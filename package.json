@@ -1,0 +1,32 @@
+{
+  "name": "sinful-collection",
+  "version": "1.2.3",
+  "description": "A private local media archive.",
+  "main": "electron/main.js",
+  "private": true,
+  "scripts": {
+    "dev": "electron .",
+    "dist": "electron-builder",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^37.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "dependencies": {
+    "busboy": "^1.6.0"
+  },
+  "build": {
+    "appId": "com.sinfulcollection.desktop",
+    "productName": "Sinful Collection",
+    "files": ["index.html", "styles.css", "app.js", "splash.html", "electron/**/*", "metadata/**/*"],
+    "win": { "target": "nsis", "icon": "assets/app-icon.ico" },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Sinful Collection"
+    }
+  }
+}
