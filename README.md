@@ -29,7 +29,7 @@ This is the meat and potatoes of the application; everything you add to your col
 
 ## Adding Media
 
-Pressing either the "Add Media" or "Import Batch" buttons will allow you to pick your image or video from your drive, and add it to your collection.
+Pressing either the "Add Media" button will allow you to pick your images or videos from your drive, and add it to your collection. Also allows drag and drop onto the program.
 There are multiple boxes available, that being:
 -title (what you name it)
 -artist (who made it)
