@@ -138,7 +138,7 @@ class Handler(SimpleHTTPRequestHandler):
             if not profile:
                 raise ValueError('Profile is required')
             data = read_catalog()
-            data.setdefault('profiles', {})[profile] = {'username': profile, 'media': payload.get('media', []), 'favoriteTags': payload.get('favoriteTags', []), 'artists': payload.get('artists', []), 'folders': payload.get('folders', [])}
+            data.setdefault('profiles', {})[profile] = {'username': profile, 'media': payload.get('media', []), 'favoriteTags': payload.get('favoriteTags', []), 'artists': payload.get('artists', []), 'folders': payload.get('folders', []), 'theme': payload.get('theme', 'pink'), 'customColor': payload.get('customColor', '#ff4f9a'), 'backgroundImage': payload.get('backgroundImage', '')}
             write_catalog(data)
             body = b'{"ok":true}'
             self.send_response(200)
