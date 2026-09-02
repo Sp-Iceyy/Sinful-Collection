@@ -37,3 +37,6 @@ There are multiple boxes available, that being:
 -description (further detailed description of what it is)
 -folder (what folder it gets stored in for the "Folders" tab)
 
+####IMPORTANT:
+regarding drag and drop functionality; it currently does not work with multiple files at a time, only single files. Will be fixed next update.
+
