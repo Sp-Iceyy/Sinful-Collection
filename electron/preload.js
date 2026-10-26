@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openMediaLocation: () => ipcRenderer.invoke('open-media-location'),
     showMediaInFolder: (payload) => ipcRenderer.invoke('show-media-in-folder', payload),
   changeMediaLocation: () => ipcRenderer.invoke('change-media-location'),
-  openExternal: (url) => ipcRenderer.invoke('open-external', url),
-  getAppVersion: () => ipcRenderer.invoke('get-app-version')
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  openExternal: (url) => ipcRenderer.invoke('open-external', url)
 });

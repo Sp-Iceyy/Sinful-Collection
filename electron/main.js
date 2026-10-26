@@ -93,7 +93,7 @@ async function changeMediaLocation(nextRoot) {
   return mediaRoot;
 }
 function sendJson(res, status, payload) { const body = JSON.stringify(payload); res.writeHead(status, { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }); res.end(body); }
-function safeFileName(name) { return `${name.replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'upload'}-${crypto.randomBytes(4).toString('hex')}${path.extname(name).toLowerCase()}`; }
+function safeFileName(name) { return `${path.parse(name).name.replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'upload'}-${crypto.randomBytes(4).toString('hex')}${path.extname(name).toLowerCase()}`; }
 function serveFile(req, res) { const requested = decodeURIComponent(req.url.slice(1).split('?')[0]); const file = path.resolve(projectRoot, requested); if (!file.startsWith(projectRoot) || !fs.existsSync(file)) return sendJson(res, 404, { error: 'Not found' }); res.writeHead(200, { 'Content-Type': requested.endsWith('.css') ? 'text/css' : requested.endsWith('.js') ? 'text/javascript' : 'text/html' }); fs.createReadStream(file).pipe(res); }
 function serveMediaFile(req, res) {
   const requested = decodeURIComponent(req.url.slice('/media/'.length).split('?')[0]);
@@ -166,7 +166,7 @@ function deleteMediaFile(req, res) {
 function startServer() {
   server = http.createServer((req, res) => {
     if (req.method === 'GET' && req.url.startsWith('/api/catalog')) { const profile = decodeURIComponent(new URL(req.url, 'http://localhost').searchParams.get('profile') || ''); const data = readMetadata(); return sendJson(res, 200, { profiles: data.profiles || {}, media: data.profiles?.[profile]?.media || [] }); }
-    if (req.method === 'PUT' && req.url === '/api/catalog') { let body = ''; req.on('data', (chunk) => { body += chunk; }); req.on('end', () => { try { const payload = JSON.parse(body); const data = readMetadata(); data.profiles = data.profiles || {}; data.profiles[payload.profile] = { username: payload.profile, media: payload.media || [], favoriteTags: payload.favoriteTags || [], artists: payload.artists || [], folders: payload.folders || [], theme: payload.theme || 'pink', customColor: payload.customColor || '#ff4f9a', backgroundImage: payload.backgroundImage || '' }; writeMetadata(data); sendJson(res, 200, { ok: true }); } catch { sendJson(res, 400, { error: 'Invalid catalog' }); } }); return; }
+    if (req.method === 'PUT' && req.url === '/api/catalog') { let body = ''; req.on('data', (chunk) => { body += chunk; }); req.on('end', () => { try { const payload = JSON.parse(body); const data = readMetadata(); data.profiles = data.profiles || {}; data.profiles[payload.profile] = { username: payload.profile, media: payload.media || [], favoriteTags: payload.favoriteTags || [], artists: payload.artists || [] }; writeMetadata(data); sendJson(res, 200, { ok: true }); } catch { sendJson(res, 400, { error: 'Invalid catalog' }); } }); return; }
     if (req.method === 'DELETE' && req.url === '/api/catalog') { let body = ''; req.on('data', (chunk) => { body += chunk; }); req.on('end', () => { try { const payload = JSON.parse(body); const data = readMetadata(); delete data.profiles?.[payload.profile]; writeMetadata(data); sendJson(res, 200, { ok: true }); } catch { sendJson(res, 400, { error: 'Invalid profile' }); } }); return; }
     if (req.method === 'POST' && req.url === '/api/upload') return handleUpload(req, res);
     if (req.method === 'DELETE' && req.url === '/api/media/file') return deleteMediaFile(req, res);
@@ -192,6 +192,15 @@ async function createWindow() {
 }
 ipcMain.handle('open-media-location', () => shell.openPath(mediaRoot));
 ipcMain.handle('get-app-version', () => app.getVersion());
+ipcMain.handle('check-for-updates', async () => {
+  const response = await fetch('https://api.github.com/repos/Sp-Iceyy/Sinful-Collection/releases/latest', { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'Sinful-Collection' } });
+  if (!response.ok) throw new Error(`GitHub returned ${response.status}.`);
+  const release = await response.json();
+  const parse = (v) => String(v).replace(/^v/i, '').split('.').map((n) => parseInt(n, 10) || 0);
+  const [a, b] = [parse(release.tag_name), parse(app.getVersion())];
+  const newer = [0, 1, 2].map((i) => (a[i] || 0) - (b[i] || 0)).find((d) => d !== 0) > 0;
+  return { current: app.getVersion(), latest: String(release.tag_name).replace(/^v/i, ''), url: release.html_url, newer };
+});
 ipcMain.handle('open-external', (_event, url) => shell.openExternal(String(url)));
 ipcMain.handle('show-media-in-folder', (_event, payload) => { const folder = payload?.type === 'video' ? 'Videos' : 'Images'; const filename = path.basename(String(payload?.filename || '')); const target = path.resolve(mediaRoot, folder, filename); if (!filename || !target.startsWith(path.resolve(mediaRoot)) || !fs.existsSync(target)) throw new Error('Stored media file was not found.'); shell.showItemInFolder(target); return true; });
 ipcMain.handle('change-media-location', async () => { const result = await dialog.showOpenDialog({ title: 'Choose media storage location', message: 'Choose where Sinful Collection should store imported images and videos.', buttonLabel: 'Move media here', properties: ['openDirectory', 'createDirectory'] }); if (result.canceled || !result.filePaths[0]) return { canceled: true }; return { path: await changeMediaLocation(result.filePaths[0]) }; });
