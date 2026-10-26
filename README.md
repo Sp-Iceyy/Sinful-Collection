@@ -14,30 +14,4 @@ Sinful Collection is a private desktop application for organizing local images a
 
 ## Run the App
 
-Install Node.js, then run:
-
-```powershell
-npm install
-npm run dev
-```
-
-The app asks where imported media should be stored on first launch.
-
-## Build a Windows installer
-
-```powershell
-npm run dist
-```
-
-Build files are created in `dist/`.
-
-## Current local web mode
-The fallback browser version can be started with:
-
-```powershell
-python server.py
-```
-
-Then open `http://localhost:8000/index.html`.
-
-Browser mode copies uploaded files because browsers cannot move arbitrary files. The Electron desktop app supports moving originals.
+-Download and run.
